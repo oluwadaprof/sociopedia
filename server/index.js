@@ -8,9 +8,9 @@ import helmet from "helmet";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
-import authRoutes from './routes/auth'
-import { register } from "./controllers/auth";
-
+import { MongoClient, ServerApiVersion } from "mongodb";
+// import authRoutes from './routes/auth'
+// import { register } from "./controllers/auth";
 
 // CONFIGURATION
 const __filename = fileURLToPath(import.meta.url);
@@ -39,23 +39,24 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 //ROUTES WITH FILE
-app.post('auth/register/', upload.single('picture'), register)
+app.post("auth/register/", upload.single("picture"));
 
-//ROUTES 
-app.use('./auth', authRoutes)
+//ROUTES
+// app.use('./auth', authRoutes)
 
 //MONGOOSE SETUP
 const PORT = process.env.PORT || 6001;
-mongoose.connect(process.env.MONGO_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
-  })
-  .catch((error) => console.log(`${error} did not connect`));
-mongoose.set('strictQuery', true)
 
-
-
+const client = new MongoClient(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
+client.connect(() => {
+  const collection = client.db("test").collection("devices");
+  app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+  // console.log(`Error Message: ${err}`);
+  // perform actions on the collection object
+  client.close();
+})
 
