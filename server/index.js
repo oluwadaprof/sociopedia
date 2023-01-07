@@ -10,7 +10,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { MongoClient, ServerApiVersion } from "mongodb";
 // import authRoutes from './routes/auth'
-// import { register } from "./controllers/auth";
+import { register } from "./controllers/auth.js";
+// import postRoutes from './routes/posts'
+// import {createPost} from './controllers/posts'
+// import { verifyToken } from "./middleware/auth";
+
 
 // CONFIGURATION
 const __filename = fileURLToPath(import.meta.url);
@@ -38,11 +42,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+
 //ROUTES WITH FILE
-app.post("auth/register/", upload.single("picture"));
+app.post("/auth/register", upload.single("picture"), register);
+app.post('./posts', verifyToken, upload.single("picture"), createPost)
 
 //ROUTES
-// app.use('./auth', authRoutes)
+app.use('./auth', authRoutes);
+app.use('/users', UserRoutes)
+app.use('/posts', postRoutes)
 
 //MONGOOSE SETUP
 const PORT = process.env.PORT || 6001;
@@ -59,4 +67,3 @@ client.connect(() => {
   // perform actions on the collection object
   client.close();
 })
-
